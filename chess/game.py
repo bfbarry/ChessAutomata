@@ -22,7 +22,7 @@ class Chess:
                 self.pieces.append(piece(team='b', position=(i, row_b)))
 
     def teams(self):
-        """Alternative way to look at self.pieces, useful for random walk"""
+        """show live pieces for each team, useful for random walk"""
         pcs = self.pieces
         return {c: [str(p) for p in pcs if p.team==c and p.alive] for c in TEAMS}
     

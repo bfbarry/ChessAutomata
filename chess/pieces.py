@@ -46,7 +46,7 @@ class Piece:
     def __repr__(self):
         return f'{self.name}{self.str_position()}'
         
-from utils import straight_search, straight_neighbors # avoid circular dependent import
+from utils import tile_check, neighbors # avoid circular dependent import
 
 class Pawn(Piece):
     def __init__(self, team, position):
@@ -79,10 +79,11 @@ class Knight(Piece):
         N = self.N
         c, r = self.position #column, row
         valid_moves = []
-        try:
-            pass
-        except IndexError:
-            pass
+        for (x,y) in neighbors('knight'):
+            try:
+                valid_moves, _ = tile_check(self, board[r+y][c+x], (c+x, r+y), {}, 0, valid_moves)
+            except IndexError:
+                pass
 
         return valid_moves
     
@@ -94,10 +95,13 @@ class Bishop(Piece):
         N = self.N
         c, r = self.position #column, row
         valid_moves = []
-        try:
-            pass
-        except IndexError:
-            pass
+        enc = {e:False for e in ['3', '2', '4', '1']} #conserving quadrant order in diag_neighbors() output for interpretability
+        for i in range(1,8): #iterate over each possible distance
+            for e, (x,y) in zip(enc.keys(), neighbors('diag')):
+                try:
+                    valid_moves, enc = tile_check(self, board[r+i*y][c+i*x], (c+i*x, r+i*y), enc, e, valid_moves)
+                except IndexError:
+                    pass
 
         return valid_moves
 
@@ -110,27 +114,15 @@ class Rook(Piece):
         valid_moves = []
         if not self.had_first_move:
             pass #castle --> needs to affect king too
-        enc_r=enc_l=enc_u=enc_d = False # piece encountered on r, l, u d direction
-        for i in range(1,8):
-            try:
-                valid_moves, enc_r = straight_search(self, board[r][c+i], (c+i, r), enc_r, valid_moves) #look right
-            except IndexError:
-                pass    
-            
-            try:                
-                valid_moves, enc_l = straight_search(self, board[r][c-i], (c-i, r), enc_l, valid_moves) #left
-            except IndexError:
-                pass    
-            
-            try:                
-                valid_moves, enc_u = straight_search(self, board[r-i][c], (c, r-i), enc_u, valid_moves) #up
-            except IndexError:
-                pass    
-            
-            try:                
-                valid_moves, enc_d = straight_search(self, board[r+i][c], (c, r+i), enc_d, valid_moves) #down
-            except IndexError:
-                pass
+        enc = {e:False for e in ['enc_l', 'enc_d', 'enc_u', 'enc_r']}
+        for i in range(1,8): #iterate over each possible distance
+            #iterate over bools and offsets
+            for e, (x,y) in zip(enc.keys(), neighbors('straight')):
+                try:
+                    valid_moves, enc = tile_check(self, board[r+i*y][c+i*x], (c+i*x, r+i*y), enc, e, valid_moves)
+                except IndexError:
+                    pass
+
         return valid_moves   
 
 class Queen(Piece):
@@ -141,10 +133,14 @@ class Queen(Piece):
         N = self.N
         c, r = self.position #column, row
         valid_moves = []
-        try:
-            pass
-        except IndexError:
-            pass
+        enc = {e:False for e in ['enc_l', 'enc_d', 'enc_u', 'enc_r', '3', '2', '4', '1']}
+        for i in range(1,8): #iterate over each possible distance
+            #iterate over bools and offsets
+            for e, (x,y) in zip(enc.keys(), neighbors('straight diag')):
+                try:
+                    valid_moves, enc = tile_check(self, board[r+i*y][c+i*x], (c+i*x, r+i*y), enc, e, valid_moves)
+                except IndexError:
+                    pass
 
         return valid_moves
     
@@ -158,10 +154,11 @@ class King(Piece):
         N = self.N
         c, r = self.position #column, row
         valid_moves = []
-        try:
-            pass
-        except IndexError:
-            pass
+        for (x,y) in neighbors('straight diag'):
+            try:
+                valid_moves, _ = tile_check(self, board[r+y][c+x], (c+x, r+y), {}, 0, valid_moves)
+            except IndexError:
+                pass
 
         return valid_moves
 
