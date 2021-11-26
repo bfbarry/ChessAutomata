@@ -33,6 +33,10 @@ class Piece:
             else:
                 print('Not a valid move')
                 return
+        c, r = move
+        # taking a piece
+        if isinstance(board[r][c], Piece):
+            board[r][c].alive = False
         self.position = move
         
     def str_position(self):
@@ -109,16 +113,24 @@ class Rook(Piece):
         enc_r=enc_l=enc_u=enc_d = False # piece encountered on r, l, u d direction
         for i in range(1,8):
             try:
-                #current item on tile, move towards that tile
-                i_r, m_r, i_l, m_l, i_u, m_u, i_d, m_d = straight_neighbors(board, r, c, i)
-                print('curri',i, i_r, m_r, i_l, m_l, i_u, m_u, i_d, m_d)
-                valid_moves, enc_r = straight_search(self, i_r, m_r, enc_r, valid_moves)
-                valid_moves, enc_l = straight_search(self, i_l, m_l, enc_l, valid_moves)
-                valid_moves, enc_u = straight_search(self, i_u, m_u, enc_u, valid_moves)
-                valid_moves, enc_d = straight_search(self, i_d, m_d, enc_d, valid_moves)
+                valid_moves, enc_r = straight_search(self, board[r][c+i], (c+i, r), enc_r, valid_moves) #look right
+            except IndexError:
+                pass    
+            
+            try:                
+                valid_moves, enc_l = straight_search(self, board[r][c-i], (c-i, r), enc_l, valid_moves) #left
+            except IndexError:
+                pass    
+            
+            try:                
+                valid_moves, enc_u = straight_search(self, board[r-i][c], (c, r-i), enc_u, valid_moves) #up
+            except IndexError:
+                pass    
+            
+            try:                
+                valid_moves, enc_d = straight_search(self, board[r+i][c], (c, r+i), enc_d, valid_moves) #down
             except IndexError:
                 pass
-        print(valid_moves)
         return valid_moves   
 
 class Queen(Piece):

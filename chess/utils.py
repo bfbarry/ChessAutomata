@@ -15,6 +15,7 @@ def _has_neg(l):
     
 def straight_search(self, it, m, enc, valid_moves):
     """
+    MIGHT GENERALIZE TO ALL OTHER RANGED PIECES
     used in Queen and Rook
         it: item at tile (an int or Piece)
         m: move to tile (tuple)
@@ -42,8 +43,8 @@ def straight_neighbors(board, r, c, i):
         i: offset
     """
     #current item on tile, move towards that tile
-    return board[r][c+i], (c+i, r),\
-           board[r][c-i], (c-i, r),\
-           board[r-i][c], (c, r-i),\
-           board[r+i][c], (c, r+i),
+    # return board[r][c+i], (c+i, r),\
+        #    board[r][c-i], (c-i, r),\
+        #    board[r-i][c], (c, r-i),\
+        #    board[r+i][c], (c, r+i),
 
