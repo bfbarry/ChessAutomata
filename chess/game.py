@@ -23,8 +23,7 @@ class Chess:
 
     def teams(self):
         """show live pieces for each team, useful for random walk"""
-        pcs = self.pieces
-        return {c: [str(p) for p in pcs if p.team==c and p.alive] for c in TEAMS}
+        return {c: [str(p) for p in self.pieces if p.team==c and p.alive] for c in TEAMS}
     
     def pick(self, pc):
         """Piece str --> Piece object"""
@@ -41,7 +40,7 @@ class Chess:
     
     def move(self, piece, in_):
         piece = self.pick(piece)
-        piece.move(self.board(), in_)
+        piece.move(self, in_)
         
     def show(self):
         empty_board()

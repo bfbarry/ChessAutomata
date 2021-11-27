@@ -1,6 +1,9 @@
 import matplotlib.pyplot as plt
 from pieces import Piece
 from itertools import permutations
+from copy import deepcopy
+
+OPTEAM = {'w':'b', 'b':'w'} #to find opposing team
 
 def empty_board():
     """MPL board display"""
@@ -18,8 +21,8 @@ def _has_neg(l):
 def _absmult(x):
     """Helper func to filter moves from permutations"""
     return abs(x[0]*x[1])
-
-def tile_check(self, it, m, enc, e, valid_moves):
+    
+def tile_test(self, it, m, enc, e, valid_moves):
     """
     checks if piece can move to a tile given current item there (empty or piece) and 
     current value of encounter boolean
@@ -30,13 +33,20 @@ def tile_check(self, it, m, enc, e, valid_moves):
         e: key for the above
         valid_moves: list
     if Knight, pass enc as empty dict and arbitrary key to ignore boolean
+
+    returns: list of possible moves, each of form (x,y). 
+    If a move would 'take' the king (i.e., the CURRENT position puts K in check), then move is of form (x,y,'K')
+
+    valid moves are not final and are verified if they put the King in check. (in self.move() ?)
     """
+
     if _has_neg(m):
         return valid_moves, enc
-    # if m == (0,7):
-    #     print('07', enc)
+
     if not enc.get(e) and isinstance(it, Piece):
-        if it.team != self.team and it.name != 'K':
+        if it.team != self.team:
+            if it.name == 'K': # verify if this puts other team in check
+                m += ('K',)
             valid_moves.append(m)
             enc[e] = True
         else:
@@ -44,6 +54,27 @@ def tile_check(self, it, m, enc, e, valid_moves):
     if not enc.get(e) and it == 0:
         valid_moves.append(m)
     return valid_moves, enc
+
+def makes_check(game, t):
+    """
+    used to see if a piece's new move puts other team in check, OR to see if a king can move to a tile without going in check
+    When checking if 'A' king can move to tile, game board is copied, move is made, and call is_check(game, 'B') 
+    """
+
+    has3 = lambda l: sum([1 for i in l if len(i) == 3]) == 1 #check if a piece has a move of form (x,y,'K')
+    for piece in game.teams()[t]:
+        piece = game.pick(piece) # extract object 
+        if has3(piece.valid_moves(game, check_filt=False)): #avoid recursion
+            print('hey')
+            return True
+
+
+def check_test(self, game, m):
+    """create hypothetical game where King moves to a potentially check-inducing position"""
+    game_copy = deepcopy(game)
+    game_copy.pick(str(self)).position = m
+    print(m)
+    return makes_check(game_copy, OPTEAM[self.team])
 
 def neighbors(directions):
     """

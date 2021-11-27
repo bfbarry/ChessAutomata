@@ -23,10 +23,10 @@ class Piece:
         self.had_first_move = False
         self.N = COLOR_DIRECTION[self.team] #in what direction the piece "sees" North. Mostly used by pawn
     
-    def move(self, board, in_='random'):
-        moves = self.valid_moves(board)
+    def move(self, game, in_='random'):
+        moves = self.valid_moves(game) #moves including self-check inducing ones
         if in_ == 'random':
-            move = random.choice(moves)
+            move = random.choice([m for m in moves if len(m) < 3]) #filter out king-taking moves
         else:
             if in_ in moves:
                 move = in_
@@ -35,8 +35,10 @@ class Piece:
                 return
         c, r = move
         # taking a piece
+        board = game.board()
         if isinstance(board[r][c], Piece):
             board[r][c].alive = False
+    
         self.position = move
         
     def str_position(self):
@@ -46,7 +48,7 @@ class Piece:
     def __repr__(self):
         return f'{self.name}{self.str_position()}'
         
-from utils import tile_check, neighbors # avoid circular dependent import
+from utils import tile_test, neighbors, check_test # avoid circular dependent import
 
 class Pawn(Piece):
     def __init__(self, team, position):
@@ -56,7 +58,8 @@ class Pawn(Piece):
             #change class instance?
             pass
         
-    def valid_moves(self, board):
+    def valid_moves(self, game, check_filt=True):
+        board = game.board()
         N = self.N
         c, r = self.position #column, row
         valid_moves = []
@@ -69,29 +72,34 @@ class Pawn(Piece):
         except IndexError:
             pass
             
+        if check_filt:
+            valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
         return valid_moves
     
 class Knight(Piece):
     def __init__(self, team, position):
         super().__init__(team, position, name='N', points=3)
 
-    def valid_moves(self, board):
+    def valid_moves(self, game, check_filt=True):
+        board = game.board()
         N = self.N
         c, r = self.position #column, row
         valid_moves = []
         for (x,y) in neighbors('knight'):
             try:
-                valid_moves, _ = tile_check(self, board[r+y][c+x], (c+x, r+y), {}, 0, valid_moves)
+                valid_moves, _ = tile_test(self, board[r+y][c+x], (c+x, r+y), {}, 0, valid_moves)
             except IndexError:
                 pass
-
+        if check_filt:
+            valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
         return valid_moves
     
 class Bishop(Piece):
     def __init__(self, team, position):
         super().__init__(team, position, name='B', points=3)
 
-    def valid_moves(self, board):
+    def valid_moves(self, game, check_filt=True):
+        board = game.board()
         N = self.N
         c, r = self.position #column, row
         valid_moves = []
@@ -99,17 +107,19 @@ class Bishop(Piece):
         for i in range(1,8): #iterate over each possible distance
             for e, (x,y) in zip(enc.keys(), neighbors('diag')):
                 try:
-                    valid_moves, enc = tile_check(self, board[r+i*y][c+i*x], (c+i*x, r+i*y), enc, e, valid_moves)
+                    valid_moves, enc = tile_test(self, board[r+i*y][c+i*x], (c+i*x, r+i*y), enc, e, valid_moves)
                 except IndexError:
                     pass
-
+        if check_filt:
+            valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
         return valid_moves
 
 class Rook(Piece):
     def __init__(self, team, position):
         super().__init__(team, position, name='R', points=5)
     
-    def valid_moves(self, board):
+    def valid_moves(self, game, check_filt=True):
+        board = game.board()
         c, r = self.position #column, row
         valid_moves = []
         if not self.had_first_move:
@@ -119,17 +129,19 @@ class Rook(Piece):
             #iterate over bools and offsets
             for e, (x,y) in zip(enc.keys(), neighbors('straight')):
                 try:
-                    valid_moves, enc = tile_check(self, board[r+i*y][c+i*x], (c+i*x, r+i*y), enc, e, valid_moves)
+                    valid_moves, enc = tile_test(self, board[r+i*y][c+i*x], (c+i*x, r+i*y), enc, e, valid_moves)
                 except IndexError:
                     pass
-
+        if check_filt:
+            valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
         return valid_moves   
 
 class Queen(Piece):
     def __init__(self, team, position):
         super().__init__(team, position, name='Q', points=9)
         
-    def valid_moves(self, board):
+    def valid_moves(self, game, check_filt=True):
+        board = game.board()
         N = self.N
         c, r = self.position #column, row
         valid_moves = []
@@ -138,10 +150,11 @@ class Queen(Piece):
             #iterate over bools and offsets
             for e, (x,y) in zip(enc.keys(), neighbors('straight diag')):
                 try:
-                    valid_moves, enc = tile_check(self, board[r+i*y][c+i*x], (c+i*x, r+i*y), enc, e, valid_moves)
+                    valid_moves, enc = tile_test(self, board[r+i*y][c+i*x], (c+i*x, r+i*y), enc, e, valid_moves)
                 except IndexError:
                     pass
-
+        if check_filt:
+            valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
         return valid_moves
     
 class King(Piece):
@@ -150,15 +163,17 @@ class King(Piece):
         self.check = False
         self.mate = False
         
-    def valid_moves(self, board):
+    def valid_moves(self, game, check_filt=True):
+        board = game.board()
         N = self.N
         c, r = self.position #column, row
         valid_moves = []
         for (x,y) in neighbors('straight diag'):
             try:
-                valid_moves, _ = tile_check(self, board[r+y][c+x], (c+x, r+y), {}, 0, valid_moves)
+                valid_moves, _ = tile_test(self, board[r+y][c+x], (c+x, r+y), {}, 0, valid_moves)
             except IndexError:
                 pass
-
+        if check_filt:
+            valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
         return valid_moves
 
