@@ -63,14 +63,22 @@ class Pawn(Piece):
         N = self.N
         c, r = self.position #column, row
         valid_moves = []
+        #not using tile_test for these first two moves because can't take a piece that way
                                         #check nobody in way
         if not self.had_first_move and board[r+N*2][c] == 0 and board[r+N*1][c] == 0: #2 spaces
             valid_moves.append((c,r+N*2))
-        try:
-            if board[r+N*1][c] == 0: # 1 space
+        try: 
+            # 1 space
+            if board[r+N*1][c] == 0: 
                 valid_moves.append((c,r+N*1))
         except IndexError:
             pass
+        #attacks
+        for x in (-1,1):
+            try:
+                valid_moves, _ = tile_test(self, board[r+N*1][c+x], (c+x,r+N*1), {}, 0, valid_moves)  
+            except IndexError:
+                pass
             
         if check_filt:
             valid_moves = [m for m in valid_moves if not check_test(self, game, m)]

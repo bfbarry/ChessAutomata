@@ -37,7 +37,7 @@ def tile_test(self, it, m, enc, e, valid_moves):
     returns: list of possible moves, each of form (x,y). 
     If a move would 'take' the king (i.e., the CURRENT position puts K in check), then move is of form (x,y,'K')
 
-    valid moves are not final and are verified if they put the King in check. (in self.move() ?)
+    valid moves are not final and are verified if they put the King in check. (in self.valid_moves() ?)
     """
 
     if _has_neg(m):
@@ -65,9 +65,8 @@ def makes_check(game, t):
     for piece in game.teams()[t]:
         piece = game.pick(piece) # extract object 
         if has3(piece.valid_moves(game, check_filt=False)): #avoid recursion
-            print('hey')
+            print(str(piece),'hey')
             return True
-
 
 def check_test(self, game, m):
     """create hypothetical game where King moves to a potentially check-inducing position"""
