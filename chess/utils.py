@@ -22,7 +22,7 @@ def _absmult(x):
     """Helper func to filter moves from permutations"""
     return abs(x[0]*x[1])
     
-def tile_test(self, it, m, enc, e, valid_moves):
+def tile_test(self, it, m, enc, e, valid_moves, test_empty=True):
     """
     checks if piece can move to a tile given current item there (empty or piece) and 
     current value of encounter boolean
@@ -51,13 +51,13 @@ def tile_test(self, it, m, enc, e, valid_moves):
             enc[e] = True
         else:
             enc[e] = True
-    if not enc.get(e) and it == 0:
+    if test_empty and not enc.get(e) and it == 0: # True most of the time except for pawn
         valid_moves.append(m)
     return valid_moves, enc
 
 def makes_check(game, t):
     """
-    used to see if a piece's new move puts other team in check, OR to see if a king can move to a tile without going in check
+    used to see if a piece's new move puts other team t in check, OR to see if a king can move to a tile without going in check
     When checking if 'A' king can move to tile, game board is copied, move is made, and call is_check(game, 'B') 
     """
 
@@ -65,14 +65,12 @@ def makes_check(game, t):
     for piece in game.teams()[t]:
         piece = game.pick(piece) # extract object 
         if has3(piece.valid_moves(game, check_filt=False)): #avoid recursion
-            print(str(piece),'hey')
             return True
 
 def check_test(self, game, m):
     """create hypothetical game where King moves to a potentially check-inducing position"""
     game_copy = deepcopy(game)
     game_copy.pick(str(self)).position = m
-    print(m)
     return makes_check(game_copy, OPTEAM[self.team])
 
 def neighbors(directions):

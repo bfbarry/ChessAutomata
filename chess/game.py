@@ -9,7 +9,8 @@ TEAMS = 'wb'
 class Chess:
     def __init__(self):
         self.pieces = []
-
+        self.check = {t:False for t in TEAMS}
+        self.mate = {t:False for t in TEAMS}
         for piece, iters in zip([Pawn, Rook, Knight, Bishop, Queen, King], 
                                 [range(8), (0,7), (1,6), (2,5), (3,), (4,)]):
             if piece == Pawn:
@@ -42,9 +43,10 @@ class Chess:
         piece = self.pick(piece)
         piece.move(self, in_)
         
-    def show(self):
+    def show(self, game=None):
         empty_board()
-        for p in self.pieces:
+        game = game if game else self
+        for p in game.pieces:
             if p.alive:
                 y,x = p.position
                 plt.annotate(str(p), (y-0.25,x), c=p.team, weight='bold')        

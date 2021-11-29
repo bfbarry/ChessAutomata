@@ -1,3 +1,4 @@
+from copy import deepcopy
 import random
 
 COLUMNS = 'abcdefgh'
@@ -20,7 +21,7 @@ class Piece:
         self.points = points
         self.id_ = hash(random.random())
         self.alive = True
-        self.had_first_move = False
+        self.had_first_move = False #for castling
         self.N = COLOR_DIRECTION[self.team] #in what direction the piece "sees" North. Mostly used by pawn
     
     def move(self, game, in_='random'):
@@ -38,8 +39,11 @@ class Piece:
         board = game.board()
         if isinstance(board[r][c], Piece):
             board[r][c].alive = False
-    
+
         self.position = move
+        self.had_first_move = True
+        if makes_check(game, OPTEAM[self.team]):
+            game.check[OPTEAM[self.team]] = True
         
     def str_position(self):
         p = self.position
@@ -48,7 +52,7 @@ class Piece:
     def __repr__(self):
         return f'{self.name}{self.str_position()}'
         
-from utils import tile_test, neighbors, check_test # avoid circular dependent import
+from utils import tile_test, neighbors, check_test, makes_check, OPTEAM # avoid circular dependent import
 
 class Pawn(Piece):
     def __init__(self, team, position):
@@ -76,12 +80,14 @@ class Pawn(Piece):
         #attacks
         for x in (-1,1):
             try:
-                valid_moves, _ = tile_test(self, board[r+N*1][c+x], (c+x,r+N*1), {}, 0, valid_moves)  
+                valid_moves, _ = tile_test(self, board[r+N*1][c+x], (c+x,r+N*1), {}, 0, valid_moves, test_empty=False)
             except IndexError:
                 pass
             
-        if check_filt:
+        #Both makes sure move doesn't put king in check, and what moves to do if king is in check
+        if check_filt: 
             valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
+
         return valid_moves
     
 class Knight(Piece):
@@ -99,7 +105,7 @@ class Knight(Piece):
             except IndexError:
                 pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not check_test(self, game, m)]
         return valid_moves
     
 class Bishop(Piece):
@@ -119,7 +125,7 @@ class Bishop(Piece):
                 except IndexError:
                     pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not check_test(self, game, m)]
         return valid_moves
 
 class Rook(Piece):
@@ -141,7 +147,7 @@ class Rook(Piece):
                 except IndexError:
                     pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not check_test(self, game, m)]
         return valid_moves   
 
 class Queen(Piece):
@@ -162,14 +168,12 @@ class Queen(Piece):
                 except IndexError:
                     pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not check_test(self, game, m)]
         return valid_moves
     
 class King(Piece):
     def __init__(self, team, position):
         super().__init__(team, position, name='K', points=None)
-        self.check = False
-        self.mate = False
         
     def valid_moves(self, game, check_filt=True):
         board = game.board()
@@ -182,6 +186,6 @@ class King(Piece):
             except IndexError:
                 pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not check_test(self, game, m)]
         return valid_moves
 
