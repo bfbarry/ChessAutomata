@@ -96,7 +96,6 @@ class Knight(Piece):
 
     def valid_moves(self, game, check_filt=True):
         board = game.board()
-        N = self.N
         c, r = self.position #column, row
         valid_moves = []
         for (x,y) in neighbors('knight'):
@@ -114,7 +113,6 @@ class Bishop(Piece):
 
     def valid_moves(self, game, check_filt=True):
         board = game.board()
-        N = self.N
         c, r = self.position #column, row
         valid_moves = []
         enc = {e:False for e in ['3', '2', '4', '1']} #conserving quadrant order in diag_neighbors() output for interpretability
@@ -156,7 +154,6 @@ class Queen(Piece):
         
     def valid_moves(self, game, check_filt=True):
         board = game.board()
-        N = self.N
         c, r = self.position #column, row
         valid_moves = []
         enc = {e:False for e in ['enc_l', 'enc_d', 'enc_u', 'enc_r', '3', '2', '4', '1']}
@@ -177,7 +174,6 @@ class King(Piece):
         
     def valid_moves(self, game, check_filt=True):
         board = game.board()
-        N = self.N
         c, r = self.position #column, row
         valid_moves = []
         for (x,y) in neighbors('straight diag'):

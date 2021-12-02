@@ -11,6 +11,7 @@ class Chess:
         self.pieces = []
         self.check = {t:False for t in TEAMS}
         self.mate = {t:False for t in TEAMS}
+        ## initialize board
         for piece, iters in zip([Pawn, Rook, Knight, Bishop, Queen, King], 
                                 [range(8), (0,7), (1,6), (2,5), (3,), (4,)]):
             if piece == Pawn:
@@ -31,7 +32,10 @@ class Chess:
         return {str(p):p for p in self.pieces}[pc]
     
     def board(self):
-        """Return matrix representation of board"""
+        """
+        Return matrix representation of board
+        Empty tiles are filled with 0
+        """
         board = [[0 for i in range(8)] for i in range(8)]
         for pc in self.pieces:
             if pc.alive:
@@ -40,10 +44,17 @@ class Chess:
         return board
     
     def move(self, piece, in_):
+        """
+        Move piece to input location
+        piece: str representation of piece, e.g. Ne5
+        in_: tuple of form (col, row). Must be a valid move,
+            as checked by piece.move()
+        """
         piece = self.pick(piece)
         piece.move(self, in_)
         
     def show(self, game=None):
+        """Show graphical representation of current game on board"""
         empty_board()
         game = game if game else self
         for p in game.pieces:

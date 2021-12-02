@@ -58,20 +58,24 @@ def tile_test(self, it, m, enc, e, valid_moves, test_empty=True):
 def makes_check(game, t):
     """
     used to see if a piece's new move puts other team t in check, OR to see if a king can move to a tile without going in check
-    When checking if 'A' king can move to tile, game board is copied, move is made, and call is_check(game, 'B') 
+    When checking if 'A' king can move to tile, game board is copied, move is made, and call makes_check(game, 'B') 
     """
 
     has3 = lambda l: sum([1 for i in l if len(i) == 3]) == 1 #check if a piece has a move of form (x,y,'K')
     for piece in game.teams()[t]:
         piece = game.pick(piece) # extract object 
-        if has3(piece.valid_moves(game, check_filt=False)): #avoid recursion
+        _valid = piece.valid_moves(game, check_filt=False)
+        if has3(piece.valid_moves(game, check_filt=False)): #False avoids recursion
+            print('valid moves with a check',_valid)
             return True
 
 def check_test(self, game, m):
-    """create hypothetical game where King moves to a potentially check-inducing position"""
+    """create hypothetical game where piece moves to a potentially check-inducing position"""
     game_copy = deepcopy(game)
     game_copy.pick(str(self)).position = m
-    return makes_check(game_copy, OPTEAM[self.team])
+    if makes_check(game_copy, OPTEAM[self.team]):
+        print(str(self), 'this move make check', m)
+        return makes_check(game_copy, OPTEAM[self.team])
 
 def neighbors(directions):
     """
