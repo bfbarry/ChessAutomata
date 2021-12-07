@@ -3,8 +3,10 @@ from pieces import Pawn, Knight, Bishop, Rook, Queen, King #don't import * becau
 from utils import empty_board
 import numpy as np
 import matplotlib.pyplot as plt
+from copy import deepcopy
 
 TEAMS = 'wb'
+COLORS = {'w':'gray', 'b':'black'}
 
 class Chess:
     def __init__(self):
@@ -23,14 +25,21 @@ class Chess:
                 self.pieces.append(piece(team='w', position=(i, row_w)))
                 self.pieces.append(piece(team='b', position=(i, row_b)))
 
-    def teams(self):
-        """show live pieces for each team, useful for random walk"""
-        return {c: [str(p) for p in self.pieces if p.team==c and p.alive] for c in TEAMS}
+        self.history = [] # array to keep snapshots at each step
+
+    def teams(self, with_moves=False):
+        """show live pieces for each team, useful for random walk
+        with_moves: bool, filter only pieces that have moves left"""
+        if with_moves:
+            return {c: [str(p) for p in self.pieces if p.alive and len(p.valid_moves(self)) > 0 and p.team==c] for c in TEAMS}
+        else:
+            return {c: [str(p) for p in self.pieces if p.alive and p.team==c] for c in TEAMS}
     
     def pick(self, pc):
         """Piece str --> Piece object"""
         return {str(p):p for p in self.pieces}[pc]
-    
+ 
+
     def board(self):
         """
         Return matrix representation of board
@@ -43,24 +52,30 @@ class Chess:
                 board[y][x] = pc
         return board
     
-    def move(self, piece, in_):
+    def move(self, piece, in_, history=False):
         """
         Move piece to input location
         piece: str representation of piece, e.g. Ne5
         in_: tuple of form (col, row). Must be a valid move,
             as checked by piece.move()
         """
-        piece = self.pick(piece)
+        if history:
+            self.history.append(deepcopy(self.pieces))
+        try: #DEUG
+            piece = self.pick(piece)
+        except:
+            print(f'{piece} not found in:', self.pieces)
+            return
         piece.move(self, in_)
         
-    def show(self, game=None):
+    def show(self, pieces=None, title=None):
         """Show graphical representation of current game on board"""
-        empty_board()
-        game = game if game else self
-        for p in game.pieces:
+        empty_board(title)
+        pieces = pieces if pieces else self.pieces
+        for p in pieces:
             if p.alive:
                 y,x = p.position
-                plt.annotate(str(p), (y-0.25,x), c=p.team, weight='bold')        
+                plt.annotate(str(p), (y-0.25,x), c=COLORS[p.team], weight='bold')
     
     def __repr__(self): # deprecated
         return str(np.array(self.board())) # for matrix format

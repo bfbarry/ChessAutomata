@@ -44,7 +44,22 @@ class Piece:
         self.had_first_move = True
         if makes_check(game, OPTEAM[self.team]):
             game.check[OPTEAM[self.team]] = True
+
+    def check_test(self, game, m):
+        """create hypothetical game where piece moves to a potentially check-inducing position"""
+        if len(m) > 2: #even though such a move (Taking the king) wouldn't 'make check', it's not a possible move
+            return True
+        game_copy = deepcopy(game)
+        c, r = m
+        board = game_copy.board()
         
+        if isinstance(board[r][c], Piece):
+            # print(f'{board[r][c]} killed!')
+            board[r][c].alive = False
+        game_copy.pick(str(self)).position = m #force position instead of using self.move() to avoid recursion
+        if makes_check(game_copy, OPTEAM[self.team]):
+            return makes_check(game_copy, OPTEAM[self.team])
+
     def str_position(self):
         p = self.position
         return f'{COLUMNS[p[0]]}{p[1]+1}'
@@ -52,7 +67,7 @@ class Piece:
     def __repr__(self):
         return f'{self.name}{self.str_position()}'
         
-from utils import tile_test, neighbors, check_test, makes_check, OPTEAM # avoid circular dependent import
+from utils import tile_test, neighbors, makes_check, OPTEAM # avoid circular dependent import
 
 class Pawn(Piece):
     def __init__(self, team, position):
@@ -86,7 +101,7 @@ class Pawn(Piece):
             
         #Both makes sure move doesn't put king in check, and what moves to do if king is in check
         if check_filt: 
-            valid_moves = [m for m in valid_moves if not check_test(self, game, m)]
+            valid_moves = [m for m in valid_moves if not self.check_test(game, m)]
 
         return valid_moves
     
@@ -104,7 +119,7 @@ class Knight(Piece):
             except IndexError:
                 pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if len(m)==2 and not check_test(self, game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m)]
         return valid_moves
     
 class Bishop(Piece):
@@ -123,7 +138,7 @@ class Bishop(Piece):
                 except IndexError:
                     pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if len(m)==2 and not check_test(self, game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m)]
         return valid_moves
 
 class Rook(Piece):
@@ -145,7 +160,7 @@ class Rook(Piece):
                 except IndexError:
                     pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if len(m)==2 and not check_test(self, game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m)]
         return valid_moves   
 
 class Queen(Piece):
@@ -165,7 +180,7 @@ class Queen(Piece):
                 except IndexError:
                     pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if len(m)==2 and not check_test(self, game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m)]
         return valid_moves
     
 class King(Piece):
@@ -182,6 +197,6 @@ class King(Piece):
             except IndexError:
                 pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if len(m)==2 and not check_test(self, game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m)]
         return valid_moves
 

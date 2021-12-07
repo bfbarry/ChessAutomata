@@ -1,17 +1,18 @@
 import matplotlib.pyplot as plt
 from pieces import Piece
 from itertools import permutations
-from copy import deepcopy
 
 OPTEAM = {'w':'b', 'b':'w'} #to find opposing team
 
-def empty_board():
+def empty_board(title):
     """MPL board display"""
     board_mat = []
     for i in range(4):
         board_mat.append([0,1]*4)
         board_mat.append([1,0]*4)
     plt.imshow(board_mat, cmap='cool')
+    if title:
+        plt.title(title)
     plt.locator_params(tight=True, nbins=8) #n ticks
     
 def _has_neg(l):
@@ -57,25 +58,16 @@ def tile_test(self, it, m, enc, e, valid_moves, test_empty=True):
 
 def makes_check(game, t):
     """
-    used to see if a piece's new move puts other team t in check, OR to see if a king can move to a tile without going in check
+    used to see if a piece's new move allows team t to put the piece's team in check,
+    e.g., to see if a king can move to a tile without going in check
     When checking if 'A' king can move to tile, game board is copied, move is made, and call makes_check(game, 'B') 
     """
 
     has3 = lambda l: sum([1 for i in l if len(i) == 3]) == 1 #check if a piece has a move of form (x,y,'K')
     for piece in game.teams()[t]:
         piece = game.pick(piece) # extract object 
-        _valid = piece.valid_moves(game, check_filt=False)
         if has3(piece.valid_moves(game, check_filt=False)): #False avoids recursion
-            print('valid moves with a check',_valid)
             return True
-
-def check_test(self, game, m):
-    """create hypothetical game where piece moves to a potentially check-inducing position"""
-    game_copy = deepcopy(game)
-    game_copy.pick(str(self)).position = m
-    if makes_check(game_copy, OPTEAM[self.team]):
-        print(str(self), 'this move make check', m)
-        return makes_check(game_copy, OPTEAM[self.team])
 
 def neighbors(directions):
     """
