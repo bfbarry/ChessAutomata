@@ -45,7 +45,7 @@ class Piece:
         if makes_check(game, OPTEAM[self.team]):
             game.check[OPTEAM[self.team]] = True
 
-    def check_test(self, game, m):
+    def check_test(self, game, m, verbose):
         """create hypothetical game where piece moves to a potentially check-inducing position"""
         if len(m) > 2: #even though such a move (Taking the king) wouldn't 'make check', it's not a possible move
             return True
@@ -58,6 +58,8 @@ class Piece:
             board[r][c].alive = False
         game_copy.pick(str(self)).position = m #force position instead of using self.move() to avoid recursion
         if makes_check(game_copy, OPTEAM[self.team]):
+            if verbose:
+                print(f'{self} to {m} makes check')
             return makes_check(game_copy, OPTEAM[self.team])
 
     def str_position(self):
@@ -77,7 +79,7 @@ class Pawn(Piece):
             #change class instance?
             pass
         
-    def valid_moves(self, game, check_filt=True):
+    def valid_moves(self, game, check_filt=True, verbose=False):
         board = game.board()
         N = self.N
         c, r = self.position #column, row
@@ -101,7 +103,7 @@ class Pawn(Piece):
             
         #Both makes sure move doesn't put king in check, and what moves to do if king is in check
         if check_filt: 
-            valid_moves = [m for m in valid_moves if not self.check_test(game, m)]
+            valid_moves = [m for m in valid_moves if not self.check_test(game, m, verbose)]
 
         return valid_moves
     
@@ -109,7 +111,7 @@ class Knight(Piece):
     def __init__(self, team, position):
         super().__init__(team, position, name='N', points=3)
 
-    def valid_moves(self, game, check_filt=True):
+    def valid_moves(self, game, check_filt=True, verbose=False):
         board = game.board()
         c, r = self.position #column, row
         valid_moves = []
@@ -119,14 +121,14 @@ class Knight(Piece):
             except IndexError:
                 pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m, verbose)]
         return valid_moves
     
 class Bishop(Piece):
     def __init__(self, team, position):
         super().__init__(team, position, name='B', points=3)
 
-    def valid_moves(self, game, check_filt=True):
+    def valid_moves(self, game, check_filt=True, verbose=False):
         board = game.board()
         c, r = self.position #column, row
         valid_moves = []
@@ -138,14 +140,14 @@ class Bishop(Piece):
                 except IndexError:
                     pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m, verbose)]
         return valid_moves
 
 class Rook(Piece):
     def __init__(self, team, position):
         super().__init__(team, position, name='R', points=5)
     
-    def valid_moves(self, game, check_filt=True):
+    def valid_moves(self, game, check_filt=True, verbose=False):
         board = game.board()
         c, r = self.position #column, row
         valid_moves = []
@@ -160,14 +162,14 @@ class Rook(Piece):
                 except IndexError:
                     pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m, verbose)]
         return valid_moves   
 
 class Queen(Piece):
     def __init__(self, team, position):
         super().__init__(team, position, name='Q', points=9)
         
-    def valid_moves(self, game, check_filt=True):
+    def valid_moves(self, game, check_filt=True, verbose=False):
         board = game.board()
         c, r = self.position #column, row
         valid_moves = []
@@ -180,14 +182,14 @@ class Queen(Piece):
                 except IndexError:
                     pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m, verbose)]
         return valid_moves
     
 class King(Piece):
     def __init__(self, team, position):
         super().__init__(team, position, name='K', points=None)
         
-    def valid_moves(self, game, check_filt=True):
+    def valid_moves(self, game, check_filt=True, verbose=False):
         board = game.board()
         c, r = self.position #column, row
         valid_moves = []
@@ -197,6 +199,6 @@ class King(Piece):
             except IndexError:
                 pass
         if check_filt:
-            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m)]
+            valid_moves = [m for m in valid_moves if len(m)==2 and not self.check_test(game, m, verbose)]
         return valid_moves
 

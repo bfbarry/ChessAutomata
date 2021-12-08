@@ -3,7 +3,7 @@ from pieces import Pawn, Knight, Bishop, Rook, Queen, King #don't import * becau
 from utils import empty_board
 import numpy as np
 import matplotlib.pyplot as plt
-from copy import deepcopy
+from copy import copy
 
 TEAMS = 'wb'
 COLORS = {'w':'gray', 'b':'black'}
@@ -37,7 +37,7 @@ class Chess:
     
     def pick(self, pc):
         """Piece str --> Piece object"""
-        return {str(p):p for p in self.pieces}[pc]
+        return {str(p):p for p in self.pieces if p.alive}[pc]
  
 
     def board(self):
@@ -60,7 +60,7 @@ class Chess:
             as checked by piece.move()
         """
         if history:
-            self.history.append(deepcopy(self.pieces))
+            self.history.append(copy(self.pieces))
         try: #DEUG
             piece = self.pick(piece)
         except:
