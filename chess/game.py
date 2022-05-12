@@ -3,7 +3,7 @@ from pieces import Pawn, Knight, Bishop, Rook, Queen, King #don't import * becau
 from utils import empty_board
 import numpy as np
 import matplotlib.pyplot as plt
-from copy import copy
+from copy import deepcopy
 
 TEAMS = 'wb'
 COLORS = {'w':'gray', 'b':'black'}
@@ -60,12 +60,8 @@ class Chess:
             as checked by piece.move()
         """
         if history:
-            self.history.append(copy(self.pieces))
-        try: #DEUG
-            piece = self.pick(piece)
-        except:
-            print(f'{piece} not found in:', self.pieces)
-            return
+            self.history.append(deepcopy(self.pieces))
+        piece = self.pick(piece)
         piece.move(self, in_)
         
     def show(self, pieces=None, title=None):
@@ -77,5 +73,11 @@ class Chess:
                 y,x = p.position
                 plt.annotate(str(p), (y-0.25,x), c=COLORS[p.team], weight='bold')
     
+    # def __deepcopy__(self, memodict={}):
+    #     """for use in debugging"""
+    #     copy_object = Chess()
+    #     copy_object.pieces = self.pieces
+    #     return copy_object
+
     def __repr__(self): # deprecated
         return str(np.array(self.board())) # for matrix format
