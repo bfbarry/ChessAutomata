@@ -1,5 +1,9 @@
 #include <string>
 #include "pieces.h"
-Piece::Piece(std::string) {
+
+
+Piece::Piece(const std::string& name) 
+: name(name) // member initialization list
+{
 
 }

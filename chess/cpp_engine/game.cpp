@@ -1,19 +1,23 @@
 #include <string>
 #include <map>
-#include <array> 
+#include <array>
+#include <vector>
+#include <memory>
 #include "pieces.h"
 
 
 static const char TEAMS[2] = {'w', 'b'};
 
 class Chess {
-    std::array<Piece, 40> pieces;
+    std::array<std::unique_ptr<Piece>, 40> pieces;
+    // Piece piece;
     std::map<char, int> check;
     std::map<char, int> mate;
     std::map<std::string, std::vector<int>> piece_to_col_positions;
 
     public:
         Chess() {
+            int arr_i = 0;
             for (auto t: TEAMS) {
                 check[t] = false;
                 mate[t] = false;
@@ -37,7 +41,14 @@ class Chess {
             //         row_w = 0;
             //         row_b = 7;
             //     }
-            //     pieces
+            if (piece_name == "Pawn") {
+                pieces[arr_i++] = std::make_unique<Pawn>("init_val")
+            }
+            // TODO: fill board with pieces, or give pieces coordinates?
             // };
         };
 };
+
+int main() {
+    return 0;
+}
