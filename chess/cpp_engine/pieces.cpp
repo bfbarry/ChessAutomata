@@ -2,8 +2,13 @@
 #include "pieces.h"
 
 
-Piece::Piece(const std::string& name) 
-: name(name) // member initialization list
+Piece::Piece(char& team, const std::string& name) 
+: team(team), name(name) // member initialization list
 {
+
+}
+
+Pawn::Pawn(char& team) 
+: team(team) {
 
 }
