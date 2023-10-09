@@ -1,19 +1,27 @@
 #include <string>
-#ifndef PIECES_H
+#pragma once
 
-#define PIECES_H
+
+typedef struct Position {
+    int row;
+    int column;
+} Position;
+
 class Piece {
     public:
-        virtual ~Piece() = default; //virutal destructor for proper cleanup
-        explicit Piece(char& team, const std::string& name);
         char team;
         std::string name;
+        Position position;
+        Piece() = default;
+        Piece(char& team, Position& position, const std::string& name);
+        virtual ~Piece() = default; //virutal destructor for proper cleanup
+        // maybe don't need alive flag if you just delete
 };
 
-class Pawn : Piece {
+class Pawn : public Piece {
+    // using Piece::Piece;
+    const std::string name = "";
     public:
-        explicit Pawn(char& team);
-        char team;
+        Pawn(char& team, Position& position);
     
 };
-#endif

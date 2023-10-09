@@ -6,7 +6,7 @@
 #include "pieces.h"
 
 
-static const char TEAMS[2] = {'w', 'b'};
+static const char TEAMS[2] = {'w', 'b'}; // TODO extern define in globals h/cpp
 
 class Chess {
     std::array<std::unique_ptr<Piece>, 40> pieces;
@@ -32,24 +32,39 @@ class Chess {
             // can also do it this way if more complex https://stackoverflow.com/questions/4007382/how-to-create-class-objects-dynamically
             for (const auto &kv: piece_to_col_positions) {
                 // also for(std::map<std::string, std::vector<int>>::iterator iter = piece_to_col_positions.begin(); iter != piece_to_col_positions.end(); ++iter)
-                std::string k = kv.first;
+                std::string piece_type = kv.first;
                 int row_w;
                 int row_b;
-                if (k == "Pawn") {
-                    row_w = 1;
-                    row_b = 6;
+                std::map<char, int> team_to_rowi;
+                if (piece_type == "Pawn") {
+                    team_to_rowi['w'] = 1;
+                    team_to_rowi['b'] = 6;
                 }
                 else {
-                    row_w = 0;
-                    row_b = 7;
+                    team_to_rowi['w'] = 0;
+                    team_to_rowi['b'] = 7;
                 }
-                if (k == "Pawn") {
-                    pieces[arr_i++] = std::make_unique<Pawn>('w');
+                for (auto t: TEAMS) { 
+                    if (piece_type == "Pawn") {
+                        for (auto col_i: kv.second) {
+                            Position pos = {col_i, team_to_rowi[t]};
+                            pieces[arr_i++] = std::make_unique<Pawn>(t, pos);
+                        }
+                    if (piece_type == "") {
+
+                    }
+                }
                 }
             };
         };
 };
 
 int main() {
+    // Chess game = Chess();
+    char x= 'w';
+    // Position p2 = {0,1};
+    // Pawn p(x, Position({0,1}));
+
     return 0;
+
 }
